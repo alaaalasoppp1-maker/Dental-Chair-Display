@@ -1,0 +1,19 @@
+Dental Chair Display Final Stable 2.0
+
+- Complete Gradle project structure: present
+- GitHub workflow does not require gradle-wrapper.jar
+- Android SDK 35 installed by workflow
+- Gradle 8.11.1 installed by workflow
+- Single Theme.DentalChair definition
+- No duplicate Android resource basenames
+- No AppCompat theme reference
+- MainActivity Kotlin braces balanced
+- Auto discovery present
+- Patient screen present
+- Appointment QR present
+- 24-hour appointment reminder protocol supported
+- Image transform and 20-degree rotation supported
+- Treatment GIF cache present
+- PDF and video present
+- Racing game present
+- Remote game controls no longer intercepted by page navigation
