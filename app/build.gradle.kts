@@ -11,15 +11,14 @@ android {
         applicationId = "com.dentalchain.display"
         minSdk = 23
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0-alpha1"
+        versionCode = 4
+        versionName = "1.2-alpha3"
     }
 
     buildFeatures { compose = true }
 }
 
 dependencies {
-implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
