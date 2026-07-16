@@ -7,6 +7,8 @@
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
 
     <application
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:label="Dental Chain Chair Display"
         android:theme="@style/Theme.DentalChair"

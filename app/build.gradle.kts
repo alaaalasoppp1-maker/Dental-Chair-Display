@@ -11,8 +11,8 @@ android {
         applicationId = "com.dentalchain.display"
         minSdk = 23
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.2-alpha3"
+        versionCode = 10
+        versionName = "1.5-alpha5"
     }
 
     buildFeatures { compose = true }
