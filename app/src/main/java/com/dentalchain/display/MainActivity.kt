@@ -29,10 +29,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusable
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.input.key.type
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -160,7 +164,7 @@ class MainActivity:ComponentActivity(){
     override fun onDestroy(){try{multicastLock?.release()}catch(_:Exception){};discoveryThread?.interrupt();socket?.cancel();super.onDestroy()}
 }
 
-private data class Palette(val bg:Brush,val card:Color,val text:Color,val muted:Color,val accent:Color,val blue:Color)
+data class Palette(val bg:Brush,val card:Color,val text:Color,val muted:Color,val accent:Color,val blue:Color)
 @Composable private fun palette(theme:String):Palette{
     val dark=theme!="light"
     return if(dark)Palette(Brush.linearGradient(listOf(Color(0xFF071727),Color(0xFF0D2941),Color(0xFF0B2035))),Color(0xCC14354C),Color.White,Color(0xFFC6DCEB),Color(0xFF54E5D6),Color(0xFF19B8F2))
@@ -250,49 +254,135 @@ private fun cacheName(id:String,url:String):String{
     }
 }
 
-@Composable fun ToothGame(){
-    var playerX by remember{mutableStateOf(0.5f)}
-    var score by remember{mutableStateOf(0)}
-    var misses by remember{mutableStateOf(0)}
-    var targetX by remember{mutableStateOf(Random.nextFloat().coerceIn(.08f,.92f))}
-    var targetY by remember{mutableStateOf(0.05f)}
-    var bad by remember{mutableStateOf(false)}
-    val focus=Modifier.onPreviewKeyEvent{e->
-        if(e.type==androidx.compose.ui.input.key.KeyEventType.KeyDown){
-            when(e.key){
-                androidx.compose.ui.input.key.Key.DirectionLeft->{playerX=(playerX-.06f).coerceAtLeast(.05f);true}
-                androidx.compose.ui.input.key.Key.DirectionRight->{playerX=(playerX+.06f).coerceAtMost(.95f);true}
-                else->false
-            }
-        }else false
-    }.focusable().focusRequester(remember{androidx.compose.ui.focus.FocusRequester()}.also{requester->LaunchedEffect(Unit){requester.requestFocus()}})
+@Composable
+fun ToothGame() {
+    var playerX by remember { mutableStateOf(0.5f) }
+    var score by remember { mutableStateOf(0) }
+    var misses by remember { mutableStateOf(0) }
+    var targetX by remember { mutableStateOf(Random.nextFloat().coerceIn(0.08f, 0.92f)) }
+    var targetY by remember { mutableStateOf(0.05f) }
+    var bad by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit){
-        while(true){
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    val gameControls = Modifier
+        .focusRequester(focusRequester)
+        .focusable()
+        .onPreviewKeyEvent { event ->
+            if (event.type == KeyEventType.KeyDown) {
+                when (event.key) {
+                    Key.DirectionLeft -> {
+                        playerX = (playerX - 0.06f).coerceAtLeast(0.05f)
+                        true
+                    }
+
+                    Key.DirectionRight -> {
+                        playerX = (playerX + 0.06f).coerceAtMost(0.95f)
+                        true
+                    }
+
+                    else -> false
+                }
+            } else {
+                false
+            }
+        }
+
+    LaunchedEffect(Unit) {
+        while (true) {
             delay(45)
-            targetY+=0.012f
-            if(targetY>=.86f){
-                if(kotlin.math.abs(targetX-playerX)<.12f){
-                    if(bad)misses++ else score++
-                }else if(!bad)misses++
-                targetX=Random.nextFloat().coerceIn(.08f,.92f)
-                targetY=.05f
-                bad=Random.nextInt(100)<35
+            targetY += 0.012f
+
+            if (targetY >= 0.86f) {
+                if (kotlin.math.abs(targetX - playerX) < 0.12f) {
+                    if (bad) misses++ else score++
+                } else if (!bad) {
+                    misses++
+                }
+
+                targetX = Random.nextFloat().coerceIn(0.08f, 0.92f)
+                targetY = 0.05f
+                bad = Random.nextInt(100) < 35
             }
         }
     }
 
-    Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFF0C3858),Color(0xFF071727)))).then(focus)){
-        Text("لعبة ابتسامة الأسنان",color=Color.White,fontSize=36.sp,modifier=Modifier.align(Alignment.TopCenter).padding(28.dp))
-        Text("النقاط: $score    الأخطاء: $misses",color=Color(0xFF67E8D5),fontSize=23.sp,modifier=Modifier.align(Alignment.TopStart).padding(28.dp))
-        Box(Modifier.offset(x=(targetX*1100).dp,y=(targetY*760).dp).size(60.dp).background(if(bad)Color(0xFF8A4E2D) else Color.White,RoundedCornerShape(30.dp)),contentAlignment=Alignment.Center){
-            Text(if(bad)"✕" else "🦷",fontSize=30.sp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        Color(0xFF0C3858),
+                        Color(0xFF071727)
+                    )
+                )
+            )
+            .then(gameControls)
+    ) {
+        Text(
+            text = "لعبة ابتسامة الأسنان",
+            color = Color.White,
+            fontSize = 36.sp,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(28.dp)
+        )
+
+        Text(
+            text = "النقاط: $score    الأخطاء: $misses",
+            color = Color(0xFF67E8D5),
+            fontSize = 23.sp,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(28.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .offset(
+                    x = (targetX * 1100f).dp,
+                    y = (targetY * 760f).dp
+                )
+                .size(60.dp)
+                .background(
+                    color = if (bad) Color(0xFF8A4E2D) else Color.White,
+                    shape = RoundedCornerShape(30.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (bad) "✕" else "🦷",
+                fontSize = 30.sp
+            )
         }
-        Box(Modifier.align(Alignment.BottomStart).offset(x=(playerX*1100).dp).padding(bottom=35.dp).size(width=150.dp,height=42.dp).background(Color(0xFF19B8F2),RoundedCornerShape(22.dp)))
-        Text("حرّك بالأسهم يمين ويسار والتقط الأسنان السليمة",color=Color(0xFFC8DCE8),fontSize=18.sp,modifier=Modifier.align(Alignment.BottomCenter).padding(12.dp))
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .offset(x = (playerX * 1100f).dp)
+                .padding(bottom = 35.dp)
+                .size(width = 150.dp, height = 42.dp)
+                .background(
+                    color = Color(0xFF19B8F2),
+                    shape = RoundedCornerShape(22.dp)
+                )
+        )
+
+        Text(
+            text = "حرّك بالأسهم يمين ويسار والتقط الأسنان السليمة",
+            color = Color(0xFFC8DCE8),
+            fontSize = 18.sp,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(12.dp)
+        )
     }
 }
-
 
 @Composable fun PdfFirstPage(url:String?){val context=LocalContext.current;var bitmap by remember(url){mutableStateOf<android.graphics.Bitmap?>(null)}
     LaunchedEffect(url){if(url==null)return@LaunchedEffect;withContext(Dispatchers.IO){try{val bytes=OkHttpClient().newCall(Request.Builder().url(url).build()).execute().body?.bytes()?:return@withContext
