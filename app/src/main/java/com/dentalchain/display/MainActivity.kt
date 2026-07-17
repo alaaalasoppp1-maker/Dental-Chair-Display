@@ -539,8 +539,7 @@ fun AppointmentQrScreen(s:DisplayState,p:Palette){
         Column(Modifier.weight(1f).background(p.card,RoundedCornerShape(36.dp)).padding(48.dp)){
             Text("موعدك القادم",color=p.accent,fontSize=18.sp)
             Spacer(Modifier.height(16.dp))
-            Text("احفظ الموعد
-على هاتفك",color=p.text,fontSize=51.sp,lineHeight=60.sp)
+            Text("احفظ الموعد\nعلى هاتفك",color=p.text,fontSize=51.sp,lineHeight=60.sp)
             Spacer(Modifier.height(20.dp))
             Text("امسح الرمز بالكاميرا، ثم وافق على إضافة الموعد إلى التقويم.",color=p.muted,fontSize=22.sp,lineHeight=35.sp)
             if(s.qrPatient.isNotBlank()){
