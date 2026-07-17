@@ -348,7 +348,7 @@ data class Palette(val bg:Brush,val card:Color,val text:Color,val muted:Color,va
 }
 
 @Composable
-private fun AmbientGlow(p:Palette){
+private fun BoxScope.AmbientGlow(p:Palette){
     val transition=rememberInfiniteTransition(label="ambient")
     val driftA by transition.animateFloat(
         initialValue=-28f,
