@@ -12,7 +12,7 @@
         android:banner="@mipmap/ic_launcher"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
-        android:label="Dental Chain Chair Display"
+        android:label="Dr Taher Clinic Display"
         android:theme="@style/Theme.DentalChair"
         android:usesCleartextTraffic="true">
 
