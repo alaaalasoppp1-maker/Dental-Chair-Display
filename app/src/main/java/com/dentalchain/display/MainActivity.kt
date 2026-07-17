@@ -15,6 +15,11 @@ import android.widget.VideoView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -316,6 +321,7 @@ data class Palette(val bg:Brush,val card:Color,val text:Color,val muted:Color,va
 @Composable fun DentalChairApp(s:DisplayState){
     val p=palette(s.theme)
     Box(Modifier.fillMaxSize().background(p.bg)){
+        AmbientGlow(p)
         Crossfade(s.mode,label="screen"){mode->when(mode){
             "black"->Box(Modifier.fillMaxSize().background(Color.Black))
             "image","gif"->MediaImage(s)
@@ -328,110 +334,163 @@ data class Palette(val bg:Brush,val card:Color,val text:Color,val muted:Color,va
             "services"->ServicesScreen(p)
             else->HomeScreen(s,p)
         }}
-        Text("STABLE FIX • DISPLAY 2.0.1",color=p.muted,fontSize=12.sp,modifier=Modifier.align(Alignment.BottomEnd).padding(18.dp).background(p.card,RoundedCornerShape(999.dp)).padding(horizontal=11.dp,vertical=6.dp))
-        if(s.startupError.isNotBlank()){
-            Text(
-                "Offline display mode",
-                color=p.muted,
-                fontSize=11.sp,
-                modifier=Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(18.dp)
-                    .background(p.card,RoundedCornerShape(999.dp))
-                    .padding(horizontal=11.dp,vertical=6.dp)
-            )
-        }
-        Row(Modifier.align(Alignment.TopEnd).padding(22.dp).background(p.card,RoundedCornerShape(999.dp)).padding(horizontal=14.dp,vertical=8.dp),verticalAlignment=Alignment.CenterVertically){
-            Box(Modifier.size(9.dp).background(if(s.connected)Color(0xFF55E7BD) else Color(0xFFFFCE69),RoundedCornerShape(9.dp)));Spacer(Modifier.width(8.dp))
+        Row(
+            Modifier.align(Alignment.TopEnd).padding(22.dp)
+                .background(p.card,RoundedCornerShape(999.dp))
+                .padding(horizontal=14.dp,vertical=8.dp),
+            verticalAlignment=Alignment.CenterVertically
+        ){
+            Box(Modifier.size(9.dp).background(if(s.connected)Color(0xFF55E7BD) else Color(0xFFFFCE69),RoundedCornerShape(9.dp)))
+            Spacer(Modifier.width(8.dp))
             Text(if(s.connected)"متصل محليًا" else s.connectionHint,color=p.muted,fontSize=14.sp)
         }
     }
 }
 
 @Composable
+private fun AmbientGlow(p:Palette){
+    val transition=rememberInfiniteTransition(label="ambient")
+    val driftA by transition.animateFloat(
+        initialValue=-28f,
+        targetValue=34f,
+        animationSpec=infiniteRepeatable(tween(7000),RepeatMode.Reverse),
+        label="driftA"
+    )
+    val driftB by transition.animateFloat(
+        initialValue=24f,
+        targetValue=-38f,
+        animationSpec=infiniteRepeatable(tween(9000),RepeatMode.Reverse),
+        label="driftB"
+    )
+    Box(
+        Modifier.size(430.dp).offset(x=(-110+driftA).dp,y=(-130).dp)
+            .background(p.blue.copy(alpha=.12f),RoundedCornerShape(430.dp))
+    )
+    Box(
+        Modifier.align(Alignment.BottomEnd).size(520.dp)
+            .offset(x=(120+driftB).dp,y=170.dp)
+            .background(p.accent.copy(alpha=.09f),RoundedCornerShape(520.dp))
+    )
+}
+
+@Composable
 fun HomeScreen(s:DisplayState,p:Palette){
     var now by remember{mutableStateOf(Date())}
     LaunchedEffect(Unit){while(true){delay(30000);now=Date()}}
-    val hour=Calendar.getInstance().apply{time=now}.get(Calendar.HOUR_OF_DAY)
-    val greeting=if(hour<12)"Good morning" else if(hour<18)"Good afternoon" else "Good evening"
     Row(
-        Modifier.fillMaxSize().padding(horizontal=64.dp,vertical=42.dp),
+        Modifier.fillMaxSize().padding(horizontal=64.dp,vertical=46.dp),
         horizontalArrangement=Arrangement.spacedBy(24.dp),
         verticalAlignment=Alignment.CenterVertically
     ){
-        Box(Modifier.weight(1.45f).fillMaxHeight(.82f).background(p.card,RoundedCornerShape(34.dp)).padding(56.dp)){
-            Column(Modifier.fillMaxSize(),verticalArrangement=Arrangement.Center){
-                Text("DENTAL CHAIN • DR. TAHER",color=p.accent,fontSize=17.sp)
-                Spacer(Modifier.height(18.dp))
-                Text("WELCOME TO",color=p.text,fontSize=54.sp)
-                Text("DR TAHER DENTAL CHAIN",color=p.blue,fontSize=58.sp)
-                Spacer(Modifier.height(16.dp))
-                Text("DDS, PhD‑Endodontics",color=p.muted,fontSize=21.sp)
-                Spacer(Modifier.height(32.dp))
-                Box(Modifier.width(170.dp).height(5.dp).background(Brush.horizontalGradient(listOf(p.accent,p.blue)),RoundedCornerShape(9.dp)))
-                Spacer(Modifier.height(34.dp))
-                Row(Modifier.background(Color.White.copy(alpha=.06f),RoundedCornerShape(16.dp)).padding(horizontal=18.dp,vertical=13.dp),verticalAlignment=Alignment.CenterVertically){
-                    Box(Modifier.size(8.dp).background(Color(0xFF63F0C9),RoundedCornerShape(8.dp)))
-                    Spacer(Modifier.width(10.dp));Text("Welcome, ",color=p.muted,fontSize=19.sp)
-                    Text(s.patientName.ifBlank{"our guest"},color=p.text,fontSize=19.sp)
-                }
-            }
+        Column(
+            Modifier.weight(1.42f).fillMaxHeight(.82f)
+                .background(p.card,RoundedCornerShape(36.dp)).padding(horizontal=58.dp,vertical=48.dp),
+            verticalArrangement=Arrangement.Center
+        ){
+            Text("WELCOME TO",color=p.accent,fontSize=18.sp)
+            Spacer(Modifier.height(16.dp))
+            Text("DR TAHER",color=p.text,fontSize=67.sp)
+            Text("CLINIC",color=p.blue,fontSize=73.sp)
+            Spacer(Modifier.height(18.dp))
+            Text("DDS, PhD · Endodontics",color=p.muted,fontSize=21.sp)
+            Spacer(Modifier.height(34.dp))
+            Box(Modifier.width(184.dp).height(5.dp).background(Brush.horizontalGradient(listOf(p.accent,p.blue)),RoundedCornerShape(9.dp)))
+            Spacer(Modifier.height(34.dp))
+            Text("Precision care. Calm experience.",color=p.muted,fontSize=19.sp)
         }
         Column(
-            Modifier.weight(.55f).fillMaxHeight(.66f).background(p.card,RoundedCornerShape(32.dp)).padding(28.dp),
+            Modifier.weight(.58f).fillMaxHeight(.70f)
+                .background(p.card,RoundedCornerShape(32.dp)).padding(30.dp),
             verticalArrangement=Arrangement.SpaceBetween
         ){
             Column{
-                Text(SimpleDateFormat("HH:mm",Locale.getDefault()).format(now),color=p.text,fontSize=52.sp)
+                Text(SimpleDateFormat("HH:mm",Locale.getDefault()).format(now),color=p.text,fontSize=54.sp)
                 Text(SimpleDateFormat("EEEE, MMMM d",Locale.US).format(now),color=p.muted,fontSize=18.sp)
             }
-            Box(Modifier.fillMaxWidth().height(220.dp).background(Brush.linearGradient(listOf(p.blue.copy(alpha=.2f),p.accent.copy(alpha=.12f))),RoundedCornerShape(28.dp)),contentAlignment=Alignment.Center){
-                Text("DT",color=p.text,fontSize=86.sp)
+            Box(
+                Modifier.fillMaxWidth().height(226.dp)
+                    .background(Brush.linearGradient(listOf(p.blue.copy(alpha=.22f),p.accent.copy(alpha=.12f))),RoundedCornerShape(30.dp)),
+                contentAlignment=Alignment.Center
+            ){
+                Column(horizontalAlignment=Alignment.CenterHorizontally){
+                    Text("DT",color=p.text,fontSize=88.sp)
+                    Text("CLINIC",color=p.muted,fontSize=15.sp)
+                }
             }
-            Column(Modifier.fillMaxWidth().background(Color.White.copy(alpha=.05f),RoundedCornerShape(17.dp)).padding(15.dp)){
-                Text("Current Experience",color=p.muted,fontSize=13.sp)
-                Text("$greeting • Patient-ready mode",color=p.text,fontSize=16.sp)
+            Row(
+                Modifier.fillMaxWidth().background(Color.White.copy(alpha=.055f),RoundedCornerShape(18.dp)).padding(16.dp),
+                verticalAlignment=Alignment.CenterVertically
+            ){
+                Box(Modifier.size(9.dp).background(Color(0xFF63F0C9),RoundedCornerShape(9.dp)))
+                Spacer(Modifier.width(10.dp))
+                Text(if(s.connected)"Display ready" else "Waiting for controller",color=p.text,fontSize=16.sp)
             }
         }
     }
 }
 @Composable
 fun PatientScreen(s:DisplayState,p:Palette){
-    Box(Modifier.fillMaxSize().padding(horizontal=70.dp,vertical=54.dp),contentAlignment=Alignment.Center){
-        Column(Modifier.fillMaxWidth(.86f).background(p.card,RoundedCornerShape(34.dp)).padding(56.dp)){
-            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){
-                Column{
-                    Text("PRIVATE PATIENT WELCOME",color=p.accent,fontSize=16.sp)
-                    Spacer(Modifier.height(14.dp))
-                    Text(s.patientName.ifBlank{"WELCOME"},color=p.text,fontSize=64.sp)
-                    Spacer(Modifier.height(8.dp))
-                    Text("أهلًا بك، نتمنى لك جلسة مريحة",color=p.muted,fontSize=23.sp)
-                }
-                Column(Modifier.width(300.dp).background(Color.White.copy(alpha=.055f),RoundedCornerShape(20.dp)).padding(20.dp)){
-                    Text("Attending Doctor",color=p.muted,fontSize=14.sp)
-                    Text(s.doctorName.ifBlank{"Dr. Taher"},color=p.text,fontSize=21.sp)
-                    Spacer(Modifier.height(17.dp))
-                    Text("Appointment Status",color=p.muted,fontSize=14.sp)
-                    Text("Ready",color=Color(0xFF63F0C9),fontSize=20.sp)
-                }
-            }
-            Spacer(Modifier.height(32.dp))
-            Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha=.10f)))
-            Spacer(Modifier.height(23.dp))
-            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){
-                Text("Dental Chain Private Care",color=p.muted,fontSize=16.sp)
-                Text("Your session is prepared with precision and privacy.",color=p.muted,fontSize=16.sp)
-                Row(Modifier.background(Color(0xFF63F0C9).copy(alpha=.08f),RoundedCornerShape(999.dp)).padding(horizontal=14.dp,vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
-                    Box(Modifier.size(9.dp).background(Color(0xFF63F0C9),RoundedCornerShape(9.dp)));Spacer(Modifier.width(8.dp));Text("Session Ready",color=Color(0xFF63F0C9),fontSize=15.sp)
-                }
+    Box(Modifier.fillMaxSize().padding(horizontal=72.dp,vertical=56.dp),contentAlignment=Alignment.Center){
+        Column(
+            Modifier.fillMaxWidth(.88f).background(p.card,RoundedCornerShape(38.dp)).padding(58.dp)
+        ){
+            Text("WELCOME",color=p.accent,fontSize=17.sp)
+            Spacer(Modifier.height(15.dp))
+            Text(s.patientName.ifBlank{"ضيفنا الكريم"},color=p.text,fontSize=66.sp)
+            Spacer(Modifier.height(10.dp))
+            Text("أهلًا بك في عيادة د. طاهر",color=p.muted,fontSize=25.sp)
+            Spacer(Modifier.height(36.dp))
+            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(18.dp)){
+                InfoCard("الطبيب",s.doctorName.ifBlank{"د. طاهر"},p,Modifier.weight(1f))
+                InfoCard("حالة الجلسة","جاهزة",p,Modifier.weight(1f),Color(0xFF63F0C9))
+                InfoCard("الخصوصية","مفعّلة",p,Modifier.weight(1f))
             }
         }
     }
 }
-@Composable fun ServicesScreen(p:Palette){val services=listOf("علاج العصب","الزرعات","التيجان والجسور","تجميل الأسنان","طب أسنان الأطفال","تبييض الأسنان")
-    Column(Modifier.fillMaxSize().padding(48.dp)){Text("خدمات العيادة",color=p.text,fontSize=42.sp);Spacer(Modifier.height(22.dp))
-        services.chunked(3).forEach{row->Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(15.dp)){row.forEach{service->Box(Modifier.weight(1f).height(150.dp).background(p.card,RoundedCornerShape(24.dp)),contentAlignment=Alignment.Center){Text(service,color=p.text,fontSize=23.sp)}}};Spacer(Modifier.height(15.dp))}
-    }}
+
+@Composable
+private fun InfoCard(title:String,value:String,p:Palette,modifier:Modifier=Modifier,valueColor:Color=p.text){
+    Column(modifier.background(Color.White.copy(alpha=.055f),RoundedCornerShape(22.dp)).padding(20.dp)){
+        Text(title,color=p.muted,fontSize=14.sp)
+        Spacer(Modifier.height(8.dp))
+        Text(value,color=valueColor,fontSize=21.sp)
+    }
+}
+
+@Composable fun ServicesScreen(p:Palette){
+    val services=listOf(
+        "علاج العصب" to "دقة وراحة",
+        "الزرعات" to "حلول ثابتة",
+        "التيجان والجسور" to "استعادة طبيعية",
+        "تجميل الأسنان" to "ابتسامة متوازنة",
+        "أسنان الأطفال" to "رعاية لطيفة",
+        "تبييض الأسنان" to "إشراقة آمنة"
+    )
+    Column(Modifier.fillMaxSize().padding(horizontal=58.dp,vertical=48.dp)){
+        Text("خدمات العيادة",color=p.text,fontSize=45.sp)
+        Spacer(Modifier.height(8.dp))
+        Text("رعاية متكاملة ضمن تجربة هادئة وحديثة",color=p.muted,fontSize=19.sp)
+        Spacer(Modifier.height(28.dp))
+        services.chunked(3).forEach{row->
+            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(17.dp)){
+                row.forEachIndexed{index,(title,subtitle)->
+                    Column(
+                        Modifier.weight(1f).height(158.dp).background(p.card,RoundedCornerShape(26.dp)).padding(22.dp),
+                        verticalArrangement=Arrangement.Center
+                    ){
+                        Text("0${services.indexOf(title to subtitle)+1}",color=p.accent,fontSize=14.sp)
+                        Spacer(Modifier.height(12.dp))
+                        Text(title,color=p.text,fontSize=24.sp)
+                        Spacer(Modifier.height(7.dp))
+                        Text(subtitle,color=p.muted,fontSize=15.sp)
+                    }
+                }
+            }
+            Spacer(Modifier.height(17.dp))
+        }
+    }
+}
 @Composable fun MediaImage(s:DisplayState){Box(Modifier.fillMaxSize().background(Color.Black),contentAlignment=Alignment.Center){AsyncImage(model=s.mediaUrl,contentDescription=s.mediaName,contentScale=ContentScale.Fit,modifier=Modifier.fillMaxSize().graphicsLayer(scaleX=s.zoom,scaleY=s.zoom,translationX=s.dx,translationY=s.dy,rotationZ=s.rotation))}}
 @Composable fun VideoPlayer(url:String?){AndroidView(factory={VideoView(it).apply{layoutParams=ViewGroup.LayoutParams(-1,-1);setVideoURI(Uri.parse(url));setOnPreparedListener{mp->mp.isLooping=true;start()}}},update={if(url!=null&&!it.isPlaying){it.setVideoURI(Uri.parse(url));it.start()}},modifier=Modifier.fillMaxSize().background(Color.Black))}
 
@@ -473,27 +532,41 @@ private fun cacheName(id:String,url:String):String{
 @Composable
 fun AppointmentQrScreen(s:DisplayState,p:Palette){
     Row(
-        Modifier.fillMaxSize().padding(horizontal=66.dp,vertical=48.dp),
-        horizontalArrangement=Arrangement.spacedBy(34.dp),
+        Modifier.fillMaxSize().padding(horizontal=68.dp,vertical=50.dp),
+        horizontalArrangement=Arrangement.spacedBy(40.dp),
         verticalAlignment=Alignment.CenterVertically
     ){
-        Column(Modifier.weight(1f).background(p.card,RoundedCornerShape(34.dp)).padding(46.dp)){
-            Text("SAVE YOUR APPOINTMENT",color=p.accent,fontSize=17.sp)
-            Spacer(Modifier.height(15.dp))
-            Text("Add your appointment\nto your phone",color=p.text,fontSize=48.sp)
-            Spacer(Modifier.height(18.dp))
-            Text("امسح الرمز لإضافة الموعد إلى تقويم هاتفك. سيتم تذكيرك تلقائيًا قبل الموعد بـ 24 ساعة.",color=p.muted,fontSize=22.sp,lineHeight=35.sp)
-            if(s.qrPatient.isNotBlank()){Spacer(Modifier.height(22.dp));Text(s.qrPatient,color=p.text,fontSize=24.sp)}
-            if(s.qrDate.isNotBlank()){Text("${s.qrDate}  •  ${s.qrTime}",color=p.muted,fontSize=19.sp)}
-            Spacer(Modifier.height(24.dp))
-            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){
-                listOf("iPhone","Android","Offline","24‑Hour Reminder").forEach{label->
-                    Text(label,color=p.muted,fontSize=13.sp,modifier=Modifier.background(Color.White.copy(alpha=.055f),RoundedCornerShape(999.dp)).padding(horizontal=11.dp,vertical=8.dp))
+        Column(Modifier.weight(1f).background(p.card,RoundedCornerShape(36.dp)).padding(48.dp)){
+            Text("موعدك القادم",color=p.accent,fontSize=18.sp)
+            Spacer(Modifier.height(16.dp))
+            Text("احفظ الموعد
+على هاتفك",color=p.text,fontSize=51.sp,lineHeight=60.sp)
+            Spacer(Modifier.height(20.dp))
+            Text("امسح الرمز بالكاميرا، ثم وافق على إضافة الموعد إلى التقويم.",color=p.muted,fontSize=22.sp,lineHeight=35.sp)
+            if(s.qrPatient.isNotBlank()){
+                Spacer(Modifier.height(26.dp))
+                Text(s.qrPatient,color=p.text,fontSize=25.sp)
+            }
+            if(s.qrDate.isNotBlank()||s.qrTime.isNotBlank()){
+                Spacer(Modifier.height(7.dp))
+                Text(listOf(s.qrDate,s.qrTime).filter{it.isNotBlank()}.joinToString("  •  "),color=p.muted,fontSize=20.sp)
+            }
+            Spacer(Modifier.height(26.dp))
+            Row(horizontalArrangement=Arrangement.spacedBy(9.dp)){
+                listOf("iPhone","Android","بدون إنترنت").forEach{label->
+                    Text(label,color=p.muted,fontSize=14.sp,modifier=Modifier.background(Color.White.copy(alpha=.055f),RoundedCornerShape(999.dp)).padding(horizontal=13.dp,vertical=9.dp))
                 }
             }
         }
-        Box(Modifier.width(360.dp).aspectRatio(1f).background(Color.White,RoundedCornerShape(28.dp)).padding(22.dp),contentAlignment=Alignment.Center){
-            AsyncImage(model=s.qrDataUrl,contentDescription="Appointment QR",contentScale=ContentScale.Fit,modifier=Modifier.fillMaxSize())
+        Column(horizontalAlignment=Alignment.CenterHorizontally){
+            Box(
+                Modifier.width(374.dp).aspectRatio(1f).background(Color.White,RoundedCornerShape(32.dp)).padding(24.dp),
+                contentAlignment=Alignment.Center
+            ){
+                AsyncImage(model=s.qrDataUrl,contentDescription="Appointment QR",contentScale=ContentScale.Fit,modifier=Modifier.fillMaxSize())
+            }
+            Spacer(Modifier.height(15.dp))
+            Text("وجّه كاميرا الهاتف نحو الرمز",color=p.muted,fontSize=16.sp)
         }
     }
 }
