@@ -1,0 +1,22 @@
+Dental Chair Display Clinic UI 2.3
+
+- Complete Gradle project structure: present
+- GitHub workflow does not require gradle-wrapper.jar
+- Android SDK 35 installed by workflow
+- Gradle 8.11.1 installed by workflow
+- Single Theme.DentalChair definition
+- No duplicate Android resource basenames
+- No AppCompat theme reference
+- MainActivity Kotlin braces balanced
+- Auto discovery present
+- Patient greeting is integrated into the home screen
+- Appointment QR present
+- 24-hour appointment reminder protocol supported
+- Image transform and 20-degree rotation supported
+- Animated treatment GIF decoder and stable on-device cache present
+- IBM Plex Sans Arabic is bundled locally
+- Light theme contrast and theme-on-reconnect support present
+- Image viewport clips zoomed or moved content inside the clinical frame
+- PDF and video present
+- Racing game present
+- Remote game controls no longer intercepted by page navigation
