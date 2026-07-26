@@ -1,0 +1,38 @@
+name: Build Dental Chair Display APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Build Debug APK
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Prepare artifact
+        run: cp app/build/outputs/apk/debug/app-debug.apk DTDC_DISPLAY_v5.1.0_DEBUG.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DTDC-DISPLAY-APK
+          path: DTDC_DISPLAY_v5.1.0_DEBUG.apk
+          if-no-files-found: error
