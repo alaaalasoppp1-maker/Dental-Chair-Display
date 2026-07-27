@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dental Chain Chair Controller</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="clinical-studio.css">
+</head><body>
+<button id="openSettings" class="floating settings-fab" title="الإعدادات">⚙</button>
+<button id="openHelp" class="floating help-fab" title="المساعدة">?</button>
+<div id="drawerBackdrop" class="backdrop"></div>
+<aside id="settingsDrawer" class="drawer">
+  <div class="drawer-head"><h2>الإعدادات</h2><button class="icon-btn close-drawer">✕</button></div>
+
+  <section class="drawer-section">
+    <h3>الاتصال التلقائي</h3>
+    <div id="url" class="code ltr">—</div>
+    <div class="status-line"><span>الحالة</span><b id="drawerConnection">بانتظار الشاشة</b></div>
+  </section>
+
+  <section class="drawer-section">
+    <h3>مجلد SOPRO</h3>
+    <div id="folder" class="code ltr">—</div>
+    <div class="row2"><button id="folderBtn">اختيار المجلد</button><button id="reindex">إعادة فهرسة</button></div>
+    <p class="current">الحالية: <b id="current">—</b></p>
+  </section>
+
+  <section class="drawer-section appearance-settings">
+    <h3>المظهر</h3>
+    <label class="setting-caption">مظهر الكونترولر</label>
+    <input id="controllerTheme" type="hidden" value="dark">
+    <div class="theme-segments" id="controllerThemeChooser">
+      <button type="button" data-controller-theme="dark">🌙 داكن</button>
+      <button type="button" data-controller-theme="light">☀ فاتح</button>
+    </div>
+    <label class="setting-caption">مظهر شاشة الكرسي</label>
+    <input id="displayTheme" type="hidden" value="dark">
+    <div class="theme-segments three" id="displayThemeChooser">
+      <button type="button" data-display-theme="dark">داكن</button>
+      <button type="button" data-display-theme="light">فاتح</button>
+      <button type="button" data-display-theme="auto">تلقائي</button>
+    </div>
+    <p class="setting-note">يُرسل مظهر الشاشة فوراً، ويُحفظ ليُطبّق تلقائياً عند إعادة الاتصال.</p>
+  </section>
+
+  <section class="drawer-section clinic-settings">
+    <h3>هوية العيادة على الشاشة</h3>
+    <label><span>عنوان السلسلة</span><input id="chainName" value="DR TAHER DENTAL CHAIN"></label>
+    <label><span>السطر الثاني</span><input id="displayTitle" value="Clinic Display"></label>
+    <label><span>اسم العيادة بالعربي</span><input id="clinicName" value="عيادة د. طاهر"></label>
+    <label><span>اسم العيادة في الرئيسية</span><input id="clinicDisplayName" value="DR TAHER CLINIC"></label>
+    <label><span>العنوان الصغير</span><input id="homeEyebrow" value="DENTAL CHAIN"></label>
+    <label><span>التخصص</span><input id="specialty" value="DDS, PhD • Endodontics"></label>
+    <label><span>كلمة الترحيب</span><input id="welcomeText" value="WELCOME"></label>
+    <label><span>رسالة الراحة</span><input id="comfortText" value="نتمنى لك جلسة مريحة"></label>
+  </section>
+
+  <section class="drawer-section qr-content-settings">
+    <h3>محتوى QR الثابت</h3>
+    <p class="setting-note">هذه النصوص ثابتة لكل المواعيد. استخدم <b>{clinic}</b> لإدخال اسم العيادة تلقائياً.</p>
+    <label><span>عنوان الموعد</span><input id="qrEventTitle" value="موعدك في {clinic}"></label>
+    <label><span>وصف الموعد</span><input id="qrEventDescription" value="شكراً لثقتكم."></label>
+    <label><span>رسالة التذكير</span><input id="qrReminderMessage" value="موعدك غداً في {clinic}"></label>
+    <label><span>التذكير قبل الموعد — بالساعات</span><input id="qrReminderHours" type="number" min="1" max="168" value="24"></label>
+  </section>
+
+  <section class="drawer-section">
+    <h3>أرشيف المرضى</h3>
+    <div id="archiveRoot" class="code ltr">—</div>
+    <button id="archiveRootBtn" class="full" type="button">تغيير مسار الحفظ</button>
+    <p class="setting-note">ينشئ الكونترولر مجلدات Panorama وSensor وTreatmentPlans تلقائياً داخل ملف كل مريض.</p>
+  </section>
+
+  <section class="drawer-section shortcuts-settings">
+    <div class="section-title-row"><div><h3>اختصارات البرنامج</h3><p>انقر على أي حقل ثم اضغط الاختصار الجديد.</p></div><button id="resetShortcuts" type="button">الافتراضية</button></div>
+    <div id="shortcutEditor" class="shortcut-editor"></div>
+    <p class="setting-note">زر Delete أو Backspace يعطّل الاختصار المحدد.</p>
+  </section>
+
+  <section class="drawer-section">
+    <label class="check"><input id="launch" type="checkbox"><span>تشغيل مع ويندوز</span></label>
+    <label class="check"><input id="minimized" type="checkbox"><span>بدء مصغرًا بجانب الساعة</span></label>
+    <button class="primary full" id="save">حفظ الإعدادات</button>
+  </section>
+</aside>
+
+<div id="helpModal" class="modal">
+  <div class="modal-card">
+    <div class="drawer-head"><h2>المساعدة والاختصارات</h2><button class="icon-btn close-help">✕</button></div>
+    <div id="shortcutHelp" class="shortcut-grid"></div>
+  </div>
+</div>
+
+<div id="previousPlansModal" class="modal" aria-hidden="true">
+  <div class="modal-card previous-plans-card">
+    <div class="drawer-head"><div><small>ملف المريض الحالي</small><h2>فتح خطة سابقة</h2><p id="previousPlansPatient">—</p></div><button id="closePreviousPlans" class="icon-btn" type="button">✕</button></div>
+    <div id="previousPlansList" class="previous-plans-list"></div>
+  </div>
+</div>
+
+<div id="clinicalStudio" class="modal studio-modal" aria-hidden="true">
+  <div class="modal-card studio-card">
+    <header class="studio-head">
+      <div><small>DTDC CLINICAL STUDIO · MANUAL · OFFLINE</small><h2>صناعة خطة علاج بصرية</h2><p id="studioPatientLabel">افتح ملف المريض من Dental Chain OS</p></div>
+      <div class="studio-head-actions"><button id="openPatientFolder" type="button">📁 ملف المريض</button><button id="closeClinicalStudio" class="icon-btn" type="button">✕</button></div>
+    </header>
+    <nav class="studio-steps" aria-label="سير العمل">
+      <button data-studio-step="source"><i>1</i><span>الصورة</span><small>اختيار واعتماد</small></button>
+      <button data-studio-step="draw"><i>2</i><span>الرسم السريري</span><small>ألوان وأسنان</small></button>
+      <button data-studio-step="plan"><i>3</i><span>مراحل العلاج</span><small>أسنان ووقت وتكلفة</small></button>
+      <button data-studio-step="present"><i>4</i><span>عرض المريض</span><small>حفظ وعرض</small></button>
+    </nav>
+
+    <section class="studio-pane" data-studio-pane="source">
+      <div class="studio-pane-title"><div><small>الخطوة 1 من 4</small><h3>اختر الصورة واعتمدها كأساس للخطة</h3></div><button id="sourceNext" class="primary" type="button">التالي: الرسم السريري ←</button></div>
+      <div class="source-layout">
+        <aside class="studio-side-card">
+          <h4>مصادر المريض</h4>
+          <label>بانوراما محفوظة<select id="patientPanoramaList"><option value="">— اختر صورة —</option></select></label>
+          <button id="useSelectedPanorama" class="full" type="button">فتح البانوراما المختارة</button>
+          <button id="importPatientPanorama" class="full" type="button">＋ إضافة بانوراما لملف المريض</button>
+          <p class="studio-help">لا يوجد تحليل آلي. الرسم والتصنيف والربط بالأسنان يتم يدوياً، وتبقى كل البيانات على هذا الكمبيوتر.</p>
+        </aside>
+        <div class="source-preview-card">
+          <div class="source-meta"><div><small>الصورة الحالية</small><b id="studioSourceName">لم يتم اختيار صورة</b></div><span id="sourceQualityBadge">بانتظار صورة</span></div>
+          <div class="source-preview"><img id="studioSourcePreview" alt="الصورة الشعاعية المختارة"><div id="studioSourceEmpty">اعرض صورة من الكونترولر أو اختر بانوراما من ملف المريض</div></div>
+          <div class="quality-grid compact"><article><small>الأبعاد</small><b id="qualityDimensions">—</b></article><article><small>الحالة</small><b id="qualityContrast">جاهزة للرسم</b></article></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="studio-pane" data-studio-pane="draw">
+      <div class="studio-pane-title"><div><small>الخطوة 2 من 4</small><h3>ارسم المناطق يدوياً واربطها باللون والسن</h3></div><div class="pane-actions"><button id="drawBack" type="button">→ الصورة</button><button id="drawNext" class="primary" type="button">التالي: المراحل ←</button></div></div>
+      <div class="drawing-studio-layout">
+        <aside class="drawing-tools-card">
+          <h4>أداة الرسم</h4>
+          <div class="draw-tool-switch" role="group" aria-label="أدوات الرسم">
+            <button type="button" data-draw-tool="draw" class="active">✎ تحديد</button>
+            <button type="button" data-draw-tool="erase">⌫ مسح</button>
+          </div>
+          <label>شفافية التعبئة <output id="annotationOpacityValue">35%</output><input id="annotationOpacity" type="range" min="10" max="80" value="35"></label>
+          <div class="panel-title"><h4>لوحة الألوان</h4><button id="addLabel" type="button">＋ لون</button></div>
+          <div id="drawingPalette" class="drawing-palette"></div>
+          <div class="label-editor">
+            <label>اسم اللون<input id="labelName" placeholder="مثال: عاجل"></label>
+            <label>اللون<input id="labelColor" type="color" value="#ef496f"></label>
+            <button id="updateLabel" type="button">حفظ اللون</button>
+            <button id="deleteLabel" class="danger" type="button">حذف</button>
+          </div>
+          <div class="drawing-history"><button id="undoDrawing" type="button">↶ تراجع</button><button id="redoDrawing" type="button">↷ إعادة</button></div>
+          <button id="clearDrawings" class="danger full" type="button">مسح جميع الرسومات</button>
+          <p class="studio-help">اضغط واسحب حول المنطقة؛ عند رفع المؤشر يُغلق الشكل ويُملأ باللون المختار.</p>
+        </aside>
+        <section class="drawing-image-card">
+          <div class="drawing-status"><span>الأداة: <b id="activeToolLabel">تحديد</b></span><span>اللون: <b id="activeLabelText">عاجل</b></span><span>السن: <b id="activeToothText">غير محدد</b></span></div>
+          <div id="annotationCanvasWrap" class="annotation-canvas-wrap"><canvas id="annotationCanvas"></canvas><div id="annotationCanvasEmpty">اختر صورة في الخطوة الأولى</div></div>
+          <div class="drawing-hint">يمكن اختيار الشكل لاحقاً لتغيير اللون أو رقم السن أو حذفه.</div>
+        </section>
+        <aside class="drawing-link-card">
+          <div class="panel-title"><h4>ترقيم الأسنان FDI</h4><button id="clearAnnotationTooth" type="button">دون سن</button></div>
+          <div id="annotationToothChart" class="tooth-chart clinical-tooth-chart"></div>
+          <section class="selected-annotation-card">
+            <h4>الشكل المحدد</h4>
+            <p id="selectedAnnotationSummary">اختر شكلاً من الصورة أو القائمة.</p>
+            <label>اللون/التصنيف<select id="selectedAnnotationLabel"></select></label>
+            <label>رقم السن<select id="selectedAnnotationTooth"></select></label>
+            <button id="deleteSelectedAnnotation" class="danger full" type="button">حذف الشكل المحدد</button>
+          </section>
+          <div class="panel-title"><h4>الرسومات</h4><span id="annotationCount">0</span></div>
+          <div id="annotationList" class="annotation-list"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="studio-pane" data-studio-pane="plan">
+      <div class="studio-pane-title"><div><small>الخطوة 3 من 4</small><h3>رتّب مجموعات الألوان ضمن مراحل علاج واضحة</h3></div><div class="pane-actions"><button id="planBack" type="button">→ الرسم</button><button id="planNext" class="primary" type="button">التالي: العرض ←</button></div></div>
+      <div class="plan-studio-layout">
+        <aside class="plan-list-card">
+          <div class="panel-title"><h4>مراحل العلاج</h4><button id="addPlanStage" type="button">＋ مرحلة</button></div>
+          <button id="buildFromDrawings" class="smart-suggest full" type="button">✦ تنظيم المراحل حسب ألوان الرسم</button>
+          <div id="planStagesList" class="plan-stages-list"></div>
+          <p id="unassignedLabels" class="studio-help"></p>
+          <button id="removePlanStage" class="danger full" type="button">حذف المرحلة الحالية</button>
+        </aside>
+        <section class="plan-editor-card">
+          <div class="form-grid">
+            <label class="span2">اسم المرحلة<input id="stageTitle"></label>
+            <label class="span2">شرح مبسط للمريض<textarea id="stageDescription" rows="3"></textarea></label>
+            <label>تصنيف المرحلة<select id="stagePriority"><option>عاجل</option><option>مهم</option><option>للمراقبة</option><option>بارد</option></select></label>
+            <label>الجلسات<input id="stageSessions" type="number" min="1" value="1"></label>
+            <label>المدة<input id="stageDuration" placeholder="مثال: أسبوعان"></label>
+            <label>التكلفة<input id="stageCost" type="number" min="0" step="0.01"></label>
+            <label>اللون<input id="stageColor" type="color" value="#19b8f2"></label>
+          </div>
+          <h4>مجموعات الرسم التابعة للمرحلة</h4>
+          <div id="stageLabelGroups" class="stage-label-groups"></div>
+          <h4>الأسنان المرتبطة بهذه المرحلة</h4>
+          <div id="planToothChart" class="tooth-chart"></div>
+          <small class="studio-help">تُجمع أسنان الرسومات المرتبطة تلقائياً، ويمكن إضافة أو استبعاد أي سن يدوياً.</small>
+          <div class="panel-title illustration-title"><div><h4>الصورة التوضيحية للمرحلة</h4><small>تظهر بجانب البانوراما عند تركيز المرحلة</small></div><button id="importStageIllustration" type="button">＋ استيراد صورة</button></div>
+          <div id="stageIllustrationGrid" class="stage-illustration-grid"></div>
+          <div class="stage-background-picker">
+            <div><h4>خلفية عرض المرحلة</h4><small>صورة هادئة تُعرض بحركة بطيئة خلف تفاصيل المرحلة</small></div>
+            <div class="file-row"><input id="stageBackgroundPath" readonly placeholder="الخلفية الافتراضية"><button id="chooseStageBackground" type="button">اختيار خلفية</button><button id="clearStageBackground" type="button">إلغاء</button></div>
+          </div>
+        </section>
+        <aside class="plan-summary-card">
+          <label>عنوان الخطة<input id="planTitle" value="خطة العلاج المقترحة"></label>
+          <label>العملة<select id="planCurrency"><option value="USD">USD $</option><option value="SYP">ل.س SYP</option><option value="EUR">EUR €</option></select></label>
+          <select id="savedPlans" hidden><option value="">— خطة سابقة —</option></select>
+          <div class="plan-total"><small>الإجمالي المتوقع</small><b id="planTotal">0 USD</b><span id="planSessionsTotal">0 جلسة</span></div>
+          <label>ملاحظة ختامية<textarea id="planClosing" rows="4">الخطة تقديرية وقابلة للتعديل بحسب الفحص السريري والاستجابة للعلاج.</textarea></label>
+        </aside>
+      </div>
+    </section>
+
+    <section class="studio-pane" data-studio-pane="present">
+      <div class="studio-pane-title"><div><small>الخطوة 4 من 4</small><h3>راجع ما سيراه المريض ثم احفظه</h3></div><button id="presentBack" type="button">→ مراحل العلاج</button></div>
+      <div class="presentation-layout">
+        <section class="patient-presentation">
+          <header><small>خطة علاج بصرية</small><h2 id="presentationPatient">ضيفنا الكريم</h2><p id="presentationTitle">خطة العلاج المقترحة</p></header>
+          <div class="presentation-focus-bar"><button id="presentAllStages" type="button">كل المراحل</button><span id="presentationFocusLabel">العرض الكامل</span></div>
+          <div class="presentation-body"><div class="presentation-visuals"><div class="presentation-panorama"><img id="presentationImage" alt="بانوراما المريض مع الرسومات"><div>بانوراما المريض</div></div><div id="presentationStageIllustration" class="presentation-stage-illustration"><img id="presentationStageImage" alt="الصورة التوضيحية للمرحلة"><div>اختر مرحلة لعرض صورتها التوضيحية</div></div></div><div id="presentationStages" class="presentation-stages"></div></div>
+          <footer><div><small>الإجمالي المتوقع</small><b id="presentationTotal">0 USD</b></div><div><small>الجلسات المتوقعة</small><b id="presentationSessions">0</b></div></footer>
+        </section>
+        <aside class="final-actions-card">
+          <h4>جاهزية العرض</h4>
+          <ul id="presentationChecklist"></ul>
+          <button id="savePlan" class="primary full" type="button">💾 حفظ في ملف المريض</button>
+          <button id="presentPlan" class="present-button full" type="button">📺 حفظ وعرض الخطة كاملة</button>
+          <button id="presentFocusedStage" class="full" type="button">📺 عرض المرحلة المحددة</button>
+          <div class="presentation-remote">
+            <button id="planStoryStart" type="button">البداية</button>
+            <button id="planStoryPrevious" type="button">السابق</button>
+            <button id="planStoryNext" class="primary" type="button">التالي</button>
+            <button id="planStoryEnd" type="button">الخاتمة</button>
+          </div>
+          <button id="newPlan" class="full" type="button">بدء خطة جديدة</button>
+          <p class="studio-help">انقر مرحلة في المعاينة: تُخفى بقية الرسومات والمراحل، وتظهر صورتها التوضيحية بجانب البانوراما، ويُحدّث العرض على الشاشة مباشرة.</p>
+        </aside>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="treatmentModal" class="modal">
+  <div class="modal-card treatment-editor">
+    <div class="drawer-head"><h2 id="treatmentEditorTitle">إضافة معالجة</h2><button class="icon-btn close-treatment">✕</button></div>
+    <input id="treatmentId" type="hidden">
+    <label><span>اسم الزر</span><input id="treatmentName" placeholder="مثال: علاج العصب"></label>
+    <label><span>ملف GIF</span>
+      <div class="file-row"><input id="treatmentFile" readonly placeholder="لم يتم اختيار ملف"><button id="chooseTreatmentFile">اختيار</button></div>
+    </label>
+    <button id="saveTreatment" class="primary full">حفظ المعالجة</button>
+  </div>
+</div>
+
+<main class="shell">
+  <header class="hero">
+    <div class="brand">
+      <img src="../../assets/app-icon.png" alt="">
+      <div><small>DR TAHER DENTAL CHAIN</small><h1>وحدة تحكم شاشة الكرسي</h1><p>Modern Technology • Precise Care • Continuous Follow-Up<br><small class="build-version">CLINIC UI • 2.8.0</small></p></div>
+    </div>
+    <div class="hero-actions">
+      <button id="controllerThemeToggle" class="controller-theme-toggle" type="button" title="تبديل مظهر الكونترولر"><span class="theme-icon">☀</span><span class="theme-label">فاتح</span></button>
+      <div id="badge" class="badge waiting"><i></i><span>بانتظار الشاشة</span></div>
+    </div>
+  </header>
+
+  <section class="card patient-card">
+    <div class="head"><div><h2>المريض والجلسة</h2><p>ابدأ من هنا ثم تحكم بكل ما يظهر على الشاشة.</p></div></div>
+    <div class="patient">
+      <input id="patient" placeholder="اسم المريض للعرض">
+      <input id="doctor" placeholder="اسم الطبيب">
+      <div class="gender-switch" role="group" aria-label="جنس المريض">
+        <label><input type="radio" name="patientGender" value="male" checked><span>ذكر</span></label>
+        <label><input type="radio" name="patientGender" value="female"><span>أنثى</span></label>
+      </div>
+      <button class="primary" id="showPatient">📺 عرض المريض</button>
+    </div>
+    <div class="session-actions">
+      <button id="home">🏠 الترحيب</button>
+      <button id="game">🎮 لعبة الأطفال</button>
+      <button id="black">⬛ شاشة سوداء</button>
+      <button class="danger" id="end">إنهاء الجلسة</button>
+    </div>
+    <div class="patient-studio-actions" aria-label="أدوات خطة العلاج">
+      <button id="openPatientPanorama" class="patient-tool" type="button"><span>🦷</span><b>بانوراما المريض</b><small>صور ملف المريض</small></button>
+      <button id="openStudioPlan" class="patient-tool primary-tool" type="button"><span>✦</span><b>صناعة خطة العلاج</b><small>Clinical Studio</small></button>
+      <button id="openPreviousPlans" class="patient-tool menu-tool" type="button"><span>☰</span><b>فتح خطة سابقة</b><small>الخطط المحفوظة</small></button>
+    </div>
+  </section>
+
+  <section class="stats">
+    <article><span>الشاشات المتصلة</span><b id="clients">0</b></article>
+    <article><span>صور SOPRO</span><b id="count">0</b></article>
+    <article><span>الصورة الحالية</span><b id="position">—</b></article>
+    <article><span>وضع العرض</span><b id="mode">ترحيب</b></article>
+  </section>
+
+  <section class="card">
+    <div class="head"><div><h2>العرض السريع</h2><p>الوظائف الرئيسية ولوحة تحكم الصورة.</p></div></div>
+    <div class="primary-actions">
+      <button class="primary huge" id="latest">أحدث صورة SOPRO</button>
+      <button class="danger huge" id="hide">إغلاق العرض</button>
+    </div>
+    <div class="media-actions">
+      <button id="temp">بانوراما / صورة مؤقتة</button>
+      <button id="gif">عرض GIF</button>
+      <button id="video">عرض فيديو</button>
+      <button id="pdf">عرض PDF</button>
+    </div>
+    <div class="viewer-controller">
+      <div class="controller-title"><b>Image Controller</b><small>Ctrl + الأسهم للتحريك</small></div>
+      <div class="dpad">
+        <span></span><button id="up">↑</button><span></span>
+        <button id="left">←</button><button id="reset">●</button><button id="right">→</button>
+        <span></span><button id="down">↓</button><span></span>
+      </div>
+      <div class="zoom-pad"><button id="zoomIn">＋</button><button id="zoomOut">−</button><button id="rotateImage" class="rotate-btn">↻<small>Ctrl + *</small></button></div>
+      <div class="image-nav"><button id="prev">السابق<br><small>Ctrl + PageUp</small></button><button id="next">التالي<br><small>Ctrl + PageDown</small></button></div>
+    </div>
+  </section>
+
+  
+  <section class="card">
+    <div class="head"><div><h2>QR الموعد — وضع احتياطي</h2><p>الاستخدام الطبيعي تلقائي من برنامج العيادة؛ هذه اللوحة للحالات الطارئة.</p></div></div>
+    <div class="appointment-grid">
+      <input id="qrPatient" placeholder="اسم المريض">
+      <input id="qrDate" type="date">
+      <input id="qrTime" type="time">
+      <input id="qrType" placeholder="نوع الموعد" value="موعد أسنان">
+      <input id="qrClinic" placeholder="اسم العيادة" value="عيادة د. طاهر">
+      <button class="primary" id="showQr">إظهار QR على الشاشة</button>
+    </div>
+  </section>
+
+  <section id="treatmentsSection" class="card">
+    <div class="head"><div><h2>المعالجات</h2><p>أزرار مخصصة تعرض GIF طبي مباشرة على الشاشة.</p></div><button id="addTreatment">＋ إضافة معالجة</button></div>
+    <div id="treatmentsGrid" class="treatments-grid"></div>
+    <div id="emptyTreatments" class="empty-state">لا توجد معالجات بعد. أضف أول زر وحدد له ملف GIF.</div>
+  </section>
+
+  <div id="notice" class="notice"></div>
+</main><script src="app.js"></script><script src="clinical-studio.js"></script></body></html>
