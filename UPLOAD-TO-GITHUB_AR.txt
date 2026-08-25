@@ -1,0 +1,9 @@
+رفع Chair Display 5.4.0 يدوياً
+==============================
+
+1) ارفع محتويات هذا المجلد إلى جذر مستودع Display.
+2) يجب أن يظهر app وgradle و.github وbuild.gradle.kts مباشرة في الجذر.
+3) بعد Commit افتح Actions ثم Build Dental Chair Display APK.
+4) نزّل Artifact باسم DTDC-DISPLAY-APK وثبّت DTDC_DISPLAY_v5.4.0_DEBUG.apk.
+
+لا ترفع المجلد الأب كاملاً ولا تترك Workflow قديماً بجانب build.yml.
