@@ -1,0 +1,6 @@
+DTDC Dental Chair Display v5.2.8
+
+- إصلاح خطأ Kotlin compilation في CachedRemoteMedia.
+- إضافة @Composable للدالة التي تستخدم LocalContext وremember وLaunchedEffect وAsyncImage.
+- إزالة @Composable غير الضرورية من xrayColorFilter.
+- لا تغييرات وظيفية على الصور أو QR أو علاج الستريتش.
