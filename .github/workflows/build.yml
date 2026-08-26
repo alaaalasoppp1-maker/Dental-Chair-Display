@@ -28,11 +28,11 @@ jobs:
         run: gradle --no-daemon :app:assembleDebug
 
       - name: Prepare artifact
-        run: cp app/build/outputs/apk/debug/app-debug.apk DTDC_DISPLAY_v5.1.0_DEBUG.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk DTDC_DISPLAY_v5.5.0_DEBUG.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: DTDC-DISPLAY-APK
-          path: DTDC_DISPLAY_v5.1.0_DEBUG.apk
+          path: DTDC_DISPLAY_v5.5.0_DEBUG.apk
           if-no-files-found: error
