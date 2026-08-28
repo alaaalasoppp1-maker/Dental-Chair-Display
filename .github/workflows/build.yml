@@ -24,15 +24,23 @@ jobs:
         with:
           gradle-version: "8.11.1"
 
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate Display 5.6 contract
+        run: node tools/validate-project.mjs
+
       - name: Build Debug APK
         run: gradle --no-daemon :app:assembleDebug
 
       - name: Prepare artifact
-        run: cp app/build/outputs/apk/debug/app-debug.apk DTDC_DISPLAY_v5.5.0_DEBUG.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk DTDC_DISPLAY_v5.6.0_DEBUG.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: DTDC-DISPLAY-APK
-          path: DTDC_DISPLAY_v5.5.0_DEBUG.apk
+          path: DTDC_DISPLAY_v5.6.0_DEBUG.apk
           if-no-files-found: error
