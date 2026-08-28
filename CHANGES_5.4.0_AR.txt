@@ -1,8 +1,0 @@
-Dental Chair Display 5.4.0
-==========================
-
-- إرسال client_hello بدور display عند فتح WebSocket.
-- اعتماد بروتوكول النقل 4 وعقد الفصل بين شاشة الكرسي وتطبيق المساعد.
-- إبقاء display_ready للتوافق الرجعي.
-- تصحيح اسم APK في GitHub Actions إلى DTDC_DISPLAY_v5.4.0_DEBUG.apk.
-- لا تغيير بصري على شاشة العرض المعتمدة.
