@@ -12,8 +12,8 @@ android {
         applicationId = "com.dentalchain.display"
         minSdk = 23
         targetSdk = 35
-        versionCode = 560
-        versionName = "5.6.0"
+        versionCode = 570
+        versionName = "5.7.0"
     }
 
     compileOptions {

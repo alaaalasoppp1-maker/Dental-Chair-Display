@@ -16,16 +16,16 @@ const source = read("app/src/main/java/com/dentalchain/display/MainActivity.kt")
 const manifest = read("app/src/main/AndroidManifest.xml");
 const workflow = read(".github/workflows/build.yml");
 
-assert.match(gradle, /versionName = "5\.6\.0"/);
-assert.match(gradle, /versionCode = 560/);
+assert.match(gradle, /versionName = "5\.7\.0"/);
+assert.match(gradle, /versionCode = 570/);
 for (const token of [
   "/display/presence", "/display/ack", "displayDeviceId", "lastDisplaySequence",
   "handledCommandIds", "http://127.0.0.1:8765", "prefetchPlanMedia",
   "KEYCODE_DPAD_RIGHT", "KEYCODE_DPAD_UP", "KEYCODE_DPAD_LEFT", "KEYCODE_DPAD_DOWN"
 ]) assert.ok(source.includes(token), `Missing Display contract token ${token}`);
-assert.ok(source.includes("* 2"), "Treatment plan card/panorama sequence is missing");
+assert.ok(source.includes("* 2 + 2"), "Treatment plan final green-result and inventory screens are missing");
 assert.match(manifest, /RECEIVE_BOOT_COMPLETED/);
 assert.match(manifest, /\.BootReceiver/);
-assert.match(workflow, /DTDC_DISPLAY_v5\.6\.0_DEBUG\.apk/);
+assert.match(workflow, /DTDC_DISPLAY_v5\.7\.0_DEBUG\.apk/);
 
-console.log("DTDC Display 5.6.0 contract validation passed");
+console.log("DTDC Display 5.7.0 contract validation passed");

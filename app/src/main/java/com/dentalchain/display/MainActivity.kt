@@ -285,7 +285,7 @@ class MainActivity : ComponentActivity() {
             .put("deviceId", displayDeviceId)
             .put("name", Build.MODEL.ifBlank { "شاشة الكرسي" })
             .put("model", "${Build.MANUFACTURER} ${Build.MODEL}".trim())
-            .put("appVersion", "5.6.0")
+            .put("appVersion", "5.7.0")
             .put("transport", transport)
             .put("lastSequence", lastDisplaySequence)
         val request = Request.Builder()
@@ -383,7 +383,7 @@ class MainActivity : ComponentActivity() {
         val base = activeHttpBase.trimEnd('/')
         val payload = JSONObject()
             .put("deviceId", displayDeviceId)
-            .put("appVersion", "5.6.0")
+            .put("appVersion", "5.7.0")
             .put("transport", if (Uri.parse(base).host in setOf("127.0.0.1", "localhost", "::1")) "usb" else "network")
             .put("commandId", command.optString("commandId"))
             .put("messageId", command.optString("messageId"))
@@ -629,7 +629,7 @@ class MainActivity : ComponentActivity() {
                         .put("type", "client_hello")
                         .put("role", "display")
                         .put("protocol", 5)
-                        .put("clientVersion", "5.6.0")
+                        .put("clientVersion", "5.7.0")
                         .put("deviceId", displayDeviceId)
                         .put("name", Build.MODEL.ifBlank { "شاشة الكرسي" })
                         .toString()
@@ -942,7 +942,7 @@ class MainActivity : ComponentActivity() {
                 prefetchPlanMedia(plan, panorama)
             }
             "plan_navigate" -> {
-                val maxStep = (state.value.treatmentPlan?.stages?.size ?: 0) * 2
+                val maxStep = (state.value.treatmentPlan?.stages?.size ?: 0) * 2 + 2
                 val nextStep = when (o.optString("action")) {
                     "next" -> (state.value.planStep + 1).coerceAtMost(maxStep)
                     "previous" -> (state.value.planStep - 1).coerceAtLeast(0)
@@ -1026,7 +1026,7 @@ class MainActivity : ComponentActivity() {
             }
             KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_UP -> {
                 if (treatmentMode) {
-                    val maxStep = (state.value.treatmentPlan?.stages?.size ?: 0) * 2
+                    val maxStep = (state.value.treatmentPlan?.stages?.size ?: 0) * 2 + 2
                     state.value = state.value.copy(planStep = (state.value.planStep + 1).coerceAtMost(maxStep), planPanoramaOpen = false, zoom = 1f, dx = 0f, dy = 0f, rotation = 0f)
                     return true
                 }
@@ -1378,12 +1378,16 @@ private fun safeColor(value: String, fallback: Color = Color(0xFF19B8F2)): Color
 private fun TreatmentPlanScreen(s: DisplayState, p: Palette, contentScaleY: Float) {
     val plan = s.treatmentPlan ?: return
     val stageCount = plan.stages.size
-    val finalStep = stageCount * 2
+    val stageSequenceEnd = stageCount * 2
+    val finalRadiographStep = stageSequenceEnd + 1
+    val finalStep = stageSequenceEnd + 2
     val currentStep = s.planStep.coerceIn(0, finalStep)
     Box(Modifier.fillMaxSize().background(p.bg)) {
         when {
             currentStep == 0 -> PlanPanoramaIntro(s, plan, 0, contentScaleY)
-            currentStep % 2 == 1 -> {
+            currentStep == finalRadiographStep -> PlanPanoramaOverlay(s, plan.stages.flatMap { it.annotations }, true, contentScaleY)
+            currentStep == finalStep -> PlanSummary(s, plan, p, true, contentScaleY)
+            currentStep <= stageSequenceEnd && currentStep % 2 == 1 -> {
                 val stageIndex = currentStep / 2
                 PlanStageScene(s, plan, plan.stages[stageIndex], stageIndex + 1, p, contentScaleY)
             }
