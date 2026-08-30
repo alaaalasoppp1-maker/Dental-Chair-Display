@@ -16,8 +16,8 @@ const source = read("app/src/main/java/com/dentalchain/display/MainActivity.kt")
 const manifest = read("app/src/main/AndroidManifest.xml");
 const workflow = read(".github/workflows/build.yml");
 
-assert.match(gradle, /versionName = "5\.9\.0"/);
-assert.match(gradle, /versionCode = 590/);
+assert.match(gradle, /versionName = "5\.9\.1"/);
+assert.match(gradle, /versionCode = 591/);
 for (const token of [
   "/display/presence", "/display/ack", "displayDeviceId", "lastDisplaySequence",
   "handledCommandIds", "http://127.0.0.1:8765", "prefetchPlanMedia",
@@ -26,6 +26,11 @@ for (const token of [
 assert.ok(source.includes("* 2 + 2"), "Treatment plan final green-result and inventory screens are missing");
 assert.match(manifest, /RECEIVE_BOOT_COMPLETED/);
 assert.match(manifest, /\.BootReceiver/);
-assert.match(workflow, /DTDC_DISPLAY_v5\.9\.0_DEBUG\.apk/);
+assert.match(manifest, /USER_UNLOCKED/);
+const bootReceiver = read("app/src/main/java/com/dentalchain/display/BootReceiver.kt");
+assert.match(bootReceiver, /AlarmManager/);
+assert.match(bootReceiver, /PendingIntent/);
+assert.match(bootReceiver, /markHandled/);
+assert.match(workflow, /DTDC_DISPLAY_v5\.9\.1_DEBUG\.apk/);
 
-console.log("DTDC Display 5.9.0 contract validation passed");
+console.log("DTDC Display 5.9.1 contract validation passed");

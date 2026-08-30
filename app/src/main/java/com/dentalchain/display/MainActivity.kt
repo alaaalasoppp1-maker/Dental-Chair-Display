@@ -200,6 +200,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Mark this boot as handled even after a manual launch. Delayed boot retries
+        // must never reopen the app after the user leaves it with Home.
+        BootLaunchState.markHandled(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         window.decorView.keepScreenOn = true
         runCatching { immersive() }
@@ -285,7 +288,7 @@ class MainActivity : ComponentActivity() {
             .put("deviceId", displayDeviceId)
             .put("name", Build.MODEL.ifBlank { "شاشة الكرسي" })
             .put("model", "${Build.MANUFACTURER} ${Build.MODEL}".trim())
-            .put("appVersion", "5.9.0")
+            .put("appVersion", "5.9.1")
             .put("transport", transport)
             .put("lastSequence", lastDisplaySequence)
         val request = Request.Builder()
@@ -383,7 +386,7 @@ class MainActivity : ComponentActivity() {
         val base = activeHttpBase.trimEnd('/')
         val payload = JSONObject()
             .put("deviceId", displayDeviceId)
-            .put("appVersion", "5.9.0")
+            .put("appVersion", "5.9.1")
             .put("transport", if (Uri.parse(base).host in setOf("127.0.0.1", "localhost", "::1")) "usb" else "network")
             .put("commandId", command.optString("commandId"))
             .put("messageId", command.optString("messageId"))
@@ -629,7 +632,7 @@ class MainActivity : ComponentActivity() {
                         .put("type", "client_hello")
                         .put("role", "display")
                         .put("protocol", 5)
-                        .put("clientVersion", "5.9.0")
+                        .put("clientVersion", "5.9.1")
                         .put("deviceId", displayDeviceId)
                         .put("name", Build.MODEL.ifBlank { "شاشة الكرسي" })
                         .toString()
