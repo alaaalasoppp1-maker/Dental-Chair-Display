@@ -13,11 +13,17 @@ class BootReceiver : BroadcastReceiver() {
                 "android.intent.action.QUICKBOOT_POWERON"
             )
         ) return
+
         runCatching {
             context.startActivity(
-                Intent(context, MainActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    .putExtra("launched_after_boot", true)
+                Intent(context, MainActivity::class.java).apply {
+                    addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    )
+                    putExtra("opened_after_device_boot", true)
+                }
             )
         }
     }

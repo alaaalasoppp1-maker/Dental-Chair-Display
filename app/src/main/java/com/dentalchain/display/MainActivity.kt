@@ -285,7 +285,7 @@ class MainActivity : ComponentActivity() {
             .put("deviceId", displayDeviceId)
             .put("name", Build.MODEL.ifBlank { "شاشة الكرسي" })
             .put("model", "${Build.MANUFACTURER} ${Build.MODEL}".trim())
-            .put("appVersion", "5.8.0")
+            .put("appVersion", "5.9.0")
             .put("transport", transport)
             .put("lastSequence", lastDisplaySequence)
         val request = Request.Builder()
@@ -383,7 +383,7 @@ class MainActivity : ComponentActivity() {
         val base = activeHttpBase.trimEnd('/')
         val payload = JSONObject()
             .put("deviceId", displayDeviceId)
-            .put("appVersion", "5.8.0")
+            .put("appVersion", "5.9.0")
             .put("transport", if (Uri.parse(base).host in setOf("127.0.0.1", "localhost", "::1")) "usb" else "network")
             .put("commandId", command.optString("commandId"))
             .put("messageId", command.optString("messageId"))
@@ -629,7 +629,7 @@ class MainActivity : ComponentActivity() {
                         .put("type", "client_hello")
                         .put("role", "display")
                         .put("protocol", 5)
-                        .put("clientVersion", "5.8.0")
+                        .put("clientVersion", "5.9.0")
                         .put("deviceId", displayDeviceId)
                         .put("name", Build.MODEL.ifBlank { "شاشة الكرسي" })
                         .toString()
@@ -1828,7 +1828,9 @@ private fun CachedRemoteMedia(
     val context = LocalContext.current
     var model by remember(url, cacheKey) { mutableStateOf<Any?>(null) }
     var loadError by remember(url, cacheKey) { mutableStateOf("") }
-    LaunchedEffect(url, cacheKey) {
+    var decodeRetry by remember(url, cacheKey) { mutableStateOf(0) }
+    var mediaLoaded by remember(url, cacheKey) { mutableStateOf(false) }
+    LaunchedEffect(url, cacheKey, decodeRetry) {
         if (url.isBlank()) {
             loadError = "empty_url"
             onError?.invoke(loadError)
@@ -1879,6 +1881,17 @@ private fun CachedRemoteMedia(
         }
         if (model == null) onError?.invoke(loadError.ifBlank { "download_failed" })
     }
+    LaunchedEffect(model, decodeRetry) {
+        if (model != null && !mediaLoaded && decodeRetry < 2) {
+            delay(2500)
+            if (!mediaLoaded) {
+                (model as? File)?.delete()
+                model = null
+                loadError = ""
+                decodeRetry += 1
+            }
+        }
+    }
     Box(modifier, contentAlignment = Alignment.Center) {
         if (model != null) {
             AsyncImage(
@@ -1887,8 +1900,20 @@ private fun CachedRemoteMedia(
                 contentScale = contentScale,
                 modifier = Modifier.fillMaxSize(),
                 colorFilter = colorFilter,
-                onSuccess = { onLoaded?.invoke() },
-                onError = { result -> onError?.invoke(result.result.throwable.message ?: "decode_failed") }
+                onSuccess = {
+                    mediaLoaded = true
+                    onLoaded?.invoke()
+                },
+                onError = { result ->
+                    if (decodeRetry < 2) {
+                        (model as? File)?.delete()
+                        model = null
+                        loadError = ""
+                        decodeRetry += 1
+                    } else {
+                        onError?.invoke(result.result.throwable.message ?: "decode_failed")
+                    }
+                }
             )
         } else if (loadError.isBlank()) {
             Text("جارِ تحميل الصورة…", color = Color(0xFFB8D4E4), fontSize = 14.sp)
