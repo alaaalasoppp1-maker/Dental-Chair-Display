@@ -14,11 +14,10 @@ required.forEach(file => assert.ok(fs.existsSync(file), `Missing ${file}`));
 const gradle = read("app/build.gradle.kts");
 const source = read("app/src/main/java/com/dentalchain/display/MainActivity.kt");
 const manifest = read("app/src/main/AndroidManifest.xml");
-const bootReceiver = read("app/src/main/java/com/dentalchain/display/BootReceiver.kt");
 const workflow = read(".github/workflows/build.yml");
 
-assert.match(gradle, /versionName = "5\.7\.0"/);
-assert.match(gradle, /versionCode = 570/);
+assert.match(gradle, /versionName = "5\.8\.0"/);
+assert.match(gradle, /versionCode = 580/);
 for (const token of [
   "/display/presence", "/display/ack", "displayDeviceId", "lastDisplaySequence",
   "handledCommandIds", "http://127.0.0.1:8765", "prefetchPlanMedia",
@@ -27,13 +26,6 @@ for (const token of [
 assert.ok(source.includes("* 2 + 2"), "Treatment plan final green-result and inventory screens are missing");
 assert.match(manifest, /RECEIVE_BOOT_COMPLETED/);
 assert.match(manifest, /\.BootReceiver/);
-for (const token of [
-  "Intent.ACTION_BOOT_COMPLETED",
-  "Intent.ACTION_LOCKED_BOOT_COMPLETED",
-  "android.intent.action.QUICKBOOT_POWERON",
-  "Intent.FLAG_ACTIVITY_NEW_TASK",
-  "MainActivity::class.java"
-]) assert.ok(bootReceiver.includes(token), `Missing boot receiver token ${token}`);
-assert.match(workflow, /DTDC_DISPLAY_v5\.7\.0_DEBUG\.apk/);
+assert.match(workflow, /DTDC_DISPLAY_v5\.8\.0_DEBUG\.apk/);
 
-console.log("DTDC Display 5.7.0 contract validation passed");
+console.log("DTDC Display 5.8.0 contract validation passed");

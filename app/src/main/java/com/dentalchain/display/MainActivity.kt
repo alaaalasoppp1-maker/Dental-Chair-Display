@@ -285,7 +285,7 @@ class MainActivity : ComponentActivity() {
             .put("deviceId", displayDeviceId)
             .put("name", Build.MODEL.ifBlank { "شاشة الكرسي" })
             .put("model", "${Build.MANUFACTURER} ${Build.MODEL}".trim())
-            .put("appVersion", "5.7.0")
+            .put("appVersion", "5.8.0")
             .put("transport", transport)
             .put("lastSequence", lastDisplaySequence)
         val request = Request.Builder()
@@ -383,7 +383,7 @@ class MainActivity : ComponentActivity() {
         val base = activeHttpBase.trimEnd('/')
         val payload = JSONObject()
             .put("deviceId", displayDeviceId)
-            .put("appVersion", "5.7.0")
+            .put("appVersion", "5.8.0")
             .put("transport", if (Uri.parse(base).host in setOf("127.0.0.1", "localhost", "::1")) "usb" else "network")
             .put("commandId", command.optString("commandId"))
             .put("messageId", command.optString("messageId"))
@@ -629,7 +629,7 @@ class MainActivity : ComponentActivity() {
                         .put("type", "client_hello")
                         .put("role", "display")
                         .put("protocol", 5)
-                        .put("clientVersion", "5.7.0")
+                        .put("clientVersion", "5.8.0")
                         .put("deviceId", displayDeviceId)
                         .put("name", Build.MODEL.ifBlank { "شاشة الكرسي" })
                         .toString()
@@ -1841,16 +1841,29 @@ private fun CachedRemoteMedia(
                 val dir = file.parentFile ?: throw IllegalStateException("cache_dir")
                 if (!file.exists() || file.length() == 0L) {
                     val part = File(dir, file.name + ".part")
-                    mediaHttpClient.newCall(
-                        Request.Builder()
-                            .url(url)
-                            .build()
-                    ).execute().use { response ->
-                        if (!response.isSuccessful) throw IllegalStateException("HTTP_${response.code}")
-                        val body = response.body ?: throw IllegalStateException("empty_body")
-                        part.outputStream().use { output -> body.byteStream().copyTo(output) }
+                    var lastFailure: Exception? = null
+                    for (attempt in 0 until 3) {
+                        if (part.exists()) part.delete()
+                        try {
+                            mediaHttpClient.newCall(
+                                Request.Builder()
+                                    .url(url)
+                                    .header("Cache-Control", "no-cache")
+                                    .build()
+                            ).execute().use { response ->
+                                if (!response.isSuccessful) throw IllegalStateException("HTTP_${response.code}")
+                                val body = response.body ?: throw IllegalStateException("empty_body")
+                                part.outputStream().use { output -> body.byteStream().copyTo(output) }
+                            }
+                            if (part.length() == 0L) throw IllegalStateException("zero_bytes")
+                            lastFailure = null
+                        } catch (error: Exception) {
+                            lastFailure = error
+                            if (attempt < 2) delay(350L * (attempt + 1))
+                        }
+                        if (lastFailure == null) break
                     }
-                    if (part.length() == 0L) throw IllegalStateException("zero_bytes")
+                    lastFailure?.let { throw it }
                     if (!part.renameTo(file)) {
                         part.copyTo(file, overwrite = true)
                         part.delete()
