@@ -1,13 +1,9 @@
-رفع Chair Display 5.7.0 كملفات استبدال
-==============================
+رفع Chair Display 5.9.2 فوق المستودع الحالي
+===========================================
 
-1) فك ضغط حزمة REPLACE-FILES.
-2) افتح مستودع Display الحالي ثم Add file > Upload files.
-3) ارفع محتويات الحزمة إلى الجذر مع الحفاظ على المسارات ووافق على استبدال الملفات المتطابقة.
-4) ارفع `.github/workflows/build.yml` الموجود في الحزمة مكان الملف الحالي؛ لا تنشئ Workflow إضافياً.
-5) تأكد من رفع `app/src/main/AndroidManifest.xml` و`app/src/main/java/com/dentalchain/display/BootReceiver.kt`؛ وهما المسؤولان عن التشغيل بعد الإقلاع.
-6) لا تحذف بقية المستودع ولا ترفع المجلد الأب.
-7) بعد Commit افتح Actions ثم Build Dental Chair Display APK.
-8) نزّل Artifact باسم DTDC-DISPLAY-APK وثبّت DTDC_DISPLAY_v5.7.0_DEBUG.apk.
+1) ارفع محتويات الحزمة إلى جذر مستودع Display الحالي واختر استبدال الملفات المتطابقة.
+2) يجب أن يظهر app وgradle و.github وbuild.gradle.kts مباشرة في الجذر.
+3) بعد Commit افتح Actions ثم Build Dental Chair Display APK.
+4) نزّل Artifact باسم DTDC-DISPLAY-APK وثبّت DTDC_DISPLAY_v5.9.2_DEBUG.apk.
 
-لا ترفع ZIP نفسه داخل المستودع.
+لا تحذف المستودع ولا الملفات الأخرى، ولا ترفع ملف ZIP نفسه إلى GitHub.

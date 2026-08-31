@@ -16,8 +16,8 @@ const source = read("app/src/main/java/com/dentalchain/display/MainActivity.kt")
 const manifest = read("app/src/main/AndroidManifest.xml");
 const workflow = read(".github/workflows/build.yml");
 
-assert.match(gradle, /versionName = "5\.9\.1"/);
-assert.match(gradle, /versionCode = 591/);
+assert.match(gradle, /versionName = "5\.9\.2"/);
+assert.match(gradle, /versionCode = 592/);
 for (const token of [
   "/display/presence", "/display/ack", "displayDeviceId", "lastDisplaySequence",
   "handledCommandIds", "http://127.0.0.1:8765", "prefetchPlanMedia",
@@ -31,6 +31,9 @@ const bootReceiver = read("app/src/main/java/com/dentalchain/display/BootReceive
 assert.match(bootReceiver, /AlarmManager/);
 assert.match(bootReceiver, /PendingIntent/);
 assert.match(bootReceiver, /markHandled/);
-assert.match(workflow, /DTDC_DISPLAY_v5\.9\.1_DEBUG\.apk/);
+assert.match(bootReceiver, /scheduleRapidRetries/);
+assert.match(bootReceiver, /450L, 1_100L, 2_000L, 3_400L, 5_200L/);
+assert.doesNotMatch(bootReceiver, /40_000L/);
+assert.match(workflow, /DTDC_DISPLAY_v5\.9\.2_DEBUG\.apk/);
 
-console.log("DTDC Display 5.9.1 contract validation passed");
+console.log("DTDC Display 5.9.2 contract validation passed");

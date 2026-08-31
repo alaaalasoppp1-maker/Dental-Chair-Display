@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.os.UserManager
 import android.provider.Settings
@@ -72,9 +74,10 @@ class BootReceiver : BroadcastReceiver() {
         if (BootLaunchState.isHandled(context, bootKey)) return
 
         if (action in BOOT_ACTIONS) {
-            scheduleRetry(context, bootKey, 4_000L, 1)
-            scheduleRetry(context, bootKey, 15_000L, 2)
-            scheduleRetry(context, bootKey, 40_000L, 3)
+            // Keep OS-level fallbacks, but do not make the clinic wait forty seconds.
+            scheduleRetry(context, bootKey, 1_500L, 1)
+            scheduleRetry(context, bootKey, 5_000L, 2)
+            scheduleRetry(context, bootKey, 12_000L, 3)
         }
 
         if (!isUserReady(context)) {
@@ -83,6 +86,27 @@ class BootReceiver : BroadcastReceiver() {
         }
 
         launchDisplay(context, bootKey)
+        if (action in BOOT_ACTIONS) scheduleRapidRetries(context, bootKey)
+    }
+
+    private fun scheduleRapidRetries(context: Context, bootKey: String) {
+        val pendingResult = goAsync()
+        val appContext = context.applicationContext
+        val handler = Handler(Looper.getMainLooper())
+        val delays = longArrayOf(450L, 1_100L, 2_000L, 3_400L, 5_200L)
+
+        delays.forEach { delayMs ->
+            handler.postDelayed({
+                if (
+                    bootKey == BootLaunchState.currentBootKey(appContext) &&
+                    !BootLaunchState.isHandled(appContext, bootKey) &&
+                    isUserReady(appContext)
+                ) {
+                    launchDisplay(appContext, bootKey)
+                }
+            }, delayMs)
+        }
+        handler.postDelayed({ pendingResult.finish() }, 5_700L)
     }
 
     private fun isUserReady(context: Context): Boolean {
@@ -107,11 +131,16 @@ class BootReceiver : BroadcastReceiver() {
             retryIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        alarmManager.set(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + delayMs,
-            pendingIntent
-        )
+        val triggerAt = SystemClock.elapsedRealtime() + delayMs
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                triggerAt,
+                pendingIntent
+            )
+        } else {
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -164,7 +193,7 @@ class BootReceiver : BroadcastReceiver() {
 
         val pendingIntent = PendingIntent.getActivity(
             context,
-            5901,
+            5902,
             launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             creatorOptions()
